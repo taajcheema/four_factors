@@ -14,10 +14,9 @@ The purpose of this paper is twofold. The first is to introduce and visualize hi
 
 
 ##### Datasets (folder)
-  * 2012-2013 Regular Season Standings.csv
-  * NBA Regular Season Results 2013-2014.csv
-  * 2013-2014 Regular Season Standings.csv
-  * NBA Regular Season Results 2014-2015.csv
+  * per_100_posessions_historical.xlsx
+  * four_factors_20xx_to_20xx.xlsx
+  * four_factors_all_seasons.xlsx
 
 ##### Notebooks
   * modeling.ipynb <br>
