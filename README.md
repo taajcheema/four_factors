@@ -7,14 +7,14 @@ The purpose of this paper is twofold. The first is to introduce and visualize hi
 ## What's In This Repository?
 
 #### Report
-  * thesis.pdf
-  * thesis.zip
+  * thesis_draft.pdf
+  * thesis_draft.zip
       * main.tex
       * images
       
 #### Notebooks
   * modeling.ipynb <br>
-  * visualizations.ipynb <br>
+  * historical_changes_visualizations.ipynb <br>
   * basketball_reference_scraping.ipynb <br>
 
 #### Datasets 
@@ -29,11 +29,17 @@ The purpose of this paper is twofold. The first is to introduce and visualize hi
       * OREB.png <br>
       * FTF.png <br>
   * Modeling
+      * heatmap.png <br>
+      * pairplot.png <br>
+      * OLSresults.png <br>
+      * wins_comparison.png <br>
+      * wins_comparison_2.png <br>
+      * wins_scatter.png <br>
 
 ## Python Libraries Used
 
 #### Data Scraping
-
+[BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/)<br>
 
 #### Data Processing
 [NumPy](https://numpy.org/)<br>
@@ -44,7 +50,8 @@ The purpose of this paper is twofold. The first is to introduce and visualize hi
 [Seaborn](https://seaborn.pydata.org/) 
 
 #### Machine Learning
-[Sci-kit learn](https://scikit-learn.org/stable/)
+[Scikit-Learn](https://scikit-learn.org/stable/)<br>
+[Statsmodels](https://www.statsmodels.org/dev/index.html)<br>
 
 ## Models Used
 
