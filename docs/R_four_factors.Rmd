@@ -1,0 +1,1131 @@
+---
+title: "__Modeling Oliver's Four Factors__"
+author: "Taaj Cheema"
+output:
+  html_document:
+    keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+\  
+
+***
+
+# 1. Loading and Exploring Data 
+
+\  
+
+### 1.1 Loading required libraries
+
+```{r, message=FALSE, warning=FALSE}
+
+library(car)
+library(caret)
+library(corrplot)
+library(dplyr)
+library(gbm)
+library(GGally)
+library(ggplot2)
+library(plotly)
+library(randomForest)
+library(readxl)
+library(rmarkdown)
+library(scales)
+library(sjstats)
+library(tidyr)
+library(viridis)
+
+```
+
+\  
+
+### 1.2 Loading our dataset of interest as a dataframe
+```{r}
+
+four_factors <- read_excel("four_factors_all_seasons.xlsx")
+
+```
+
+\  
+
+### 1.3 Data exploration 
+```{r}
+
+head(four_factors)
+summary(four_factors)
+
+```
+
+\  
+
+### 1.4 Renaming columns containing special characters
+```{r}
+
+four_factors_new <- four_factors %>% dplyr::rename(eFG = `eFG%`,
+                                TOV = `TOV%`,
+                                OREB = `OREB%`,
+                                OPPeFG = `OPPeFG%`,
+                                OPPTOV = `OPPTOV%`,
+                                DREB = `DREB%`)
+
+names(four_factors_new)
+
+```
+
+\  
+
+### 1.5 Creating a new dataframe 
+```{r}
+
+four_factors_scaled = four_factors_new
+four_factors_scaled
+
+```
+
+\  
+
+### 1.6 Scaling the `eFG`, `FTF`, `OPPeFG` and `OPPFTF` features by a factor of 100
+```{r}
+
+four_factors_scaled$eFG <- four_factors_new$eFG * 100
+four_factors_scaled$FTF <- four_factors_new$FTF * 100
+four_factors_scaled$OPPeFG <- four_factors_new$OPPeFG * 100
+four_factors_scaled$OPPFTF <- four_factors_new$OPPFTF * 100
+
+summary(four_factors_scaled)
+str(four_factors_scaled)
+
+```
+
+\  
+
+### 1.7 Creating octiles for the `WINS` feature
+```{r}
+
+wins_octile <- ntile(four_factors_scaled$WINS, 8)
+four_factors_scaled$octile <- as.factor(wins_octile)
+
+str(four_factors_scaled)
+
+```
+
+\  
+
+***
+
+# 2. Graphical Analysis
+
+\  
+
+### 2.1 Scatter Plots
+
+\  
+
+##### Checking graphically to see if there is a relationship between our response variable and predictor variables
+
+```{r}
+
+
+ggplot(four_factors_scaled, aes(eFG, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. Effective Field Goal %") +
+  xlab("Effective Field Goal %") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+ggplot(four_factors_scaled, aes(TOV, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. TOV") +
+  xlab("TOV") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+ggplot(four_factors_scaled, aes(OREB, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. OREB") +
+  xlab("OREB") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+ggplot(four_factors_scaled, aes(FTF, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. FTF") +
+  xlab("FTF") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+ggplot(four_factors_scaled, aes(OPPeFG, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. OPPeFG") +
+  xlab("OPPeFG") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+ggplot(four_factors_scaled, aes(OPPTOV, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. OPPTOV") +
+  xlab("OPPTOV") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+ggplot(four_factors_scaled, aes(DREB, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. DREB") +
+  xlab("DREB") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+ggplot(four_factors_scaled, aes(OPPFTF, WINS)) +
+  geom_point(aes(color = wins_octile)) +
+  geom_smooth(method ="lm") + 
+  ggtitle("Wins vs. OPPFTF") +
+  xlab("OPPFTF") +
+  ylab("Wins") +
+  labs(color = "Wins Octile") +
+  coord_cartesian() +
+  scale_color_viridis(option = "C") +
+  theme_bw()
+
+```
+
+
+```{r}
+new = t(four_factors_scaled)
+```
+
+\  
+
+### 2.2 Box Plots
+
+\  
+
+##### Checking graphically to see if there are outliers in our predictor variables
+
+```{r}
+
+boxplot(four_factors_scaled$eFG, main="eFG%")
+boxplot(four_factors_scaled$TOV, main="TOV%")
+boxplot(four_factors_scaled$OREB, main="OREB")
+boxplot(four_factors_scaled$FTF, main="FTF")
+boxplot(four_factors_scaled$OPPeFG, main="OPPeFG%")
+boxplot(four_factors_scaled$OPPTOV, main="OPPTOV%")
+boxplot(four_factors_scaled$DREB, main="DREB")
+boxplot(four_factors_scaled$OPPFTF, main="OPPFTF")
+boxplot(four_factors_scaled$WINS, main="WINS")
+
+
+```
+
+\  
+
+##### Boxplot for all predictors
+```{r}
+
+fact_eFG = data.frame("col" = rep("eFG", 330))
+fact_TOV = data.frame("col" = rep("TOV", 330))
+fact_OREB = data.frame("col" = rep("OREB", 330))
+fact_FTF = data.frame("col" = rep("FTF", 330))
+fact_OPPeFG = data.frame("col" = rep("OPPeFG", 330))
+fact_OPPTOV = data.frame("col" = rep("OPPTOV", 330))
+fact_DREB = data.frame("col" = rep("DREB", 330))
+fact_OPPFTF = data.frame("col" = rep("OPPFTF", 330))
+
+jjjj <- rbind(fact_eFG, fact_TOV, fact_OREB, fact_FTF, fact_OPPeFG, fact_OPPTOV, fact_DREB, fact_OPPFTF)
+
+jjjj$value[1:330] <- four_factors_scaled$eFG
+jjjj$value[331:660] <- four_factors_scaled$TOV
+jjjj$value[661:990] <- four_factors_scaled$OREB
+jjjj$value[991:1320] <- four_factors_scaled$FTF
+jjjj$value[1321:1650] <- four_factors_scaled$OPPeFG
+jjjj$value[1651:1980] <- four_factors_scaled$OPPTOV
+jjjj$value[1981:2310] <- four_factors_scaled$DREB
+jjjj$value[2311:2640] <- four_factors_scaled$OPPFTF
+
+#jjjj
+
+h <- ggplot(data=jjjj, aes(x=jjjj$col, y=jjjj$value, color = col)) + 
+geom_boxplot() +
+xlab("Factor") +
+theme(legend.position="none") +
+xlab("") +
+theme_bw()
+
+h
+```
+
+\  
+
+### 2.3 Density Plots
+
+\  
+
+##### Checking graphically to see if our feature variables have a normal distribution 
+
+```{r}
+
+dens_eFG <- density(four_factors_new$eFG)
+plot(dens_eFG, main = "Effective Field Goal % Density")
+polygon(dens_eFG, col="#fca538", border="#6721a7")
+
+dens_TOV <- density(four_factors_new$TOV)
+plot(dens_TOV, main = "Turnover Density")
+polygon(dens_TOV, col="#fca538", border="#6721a7")
+
+dens_OREB <- density(four_factors_new$OREB)
+plot(dens_OREB, main = "Offensive Rebound Density")
+polygon(dens_OREB, col="#fca538", border="#6721a7")
+
+dens_FTF <- density(four_factors_new$FTF)
+plot(dens_FTF, main = "Free Throw Factor Density")
+polygon(dens_FTF, col="#fca538", border="#6721a7")
+
+dens_OPPeFG <- density(four_factors_new$OPPeFG)
+plot(dens_OPPeFG, main = "Opponent Effective Field Goal % Density")
+polygon(dens_OPPeFG, col="#fca538", border="#6721a7")
+
+dens_OPPTOV <- density(four_factors_new$OPPTOV)
+plot(dens_OPPTOV, main = "Opponent Turnover Density")
+polygon(dens_OPPTOV, col="#fca538", border="#6721a7")
+
+dens_DREB <- density(four_factors_new$DREB)
+plot(dens_DREB, main = "Defensive Rebound Density")
+polygon(dens_DREB, col="#fca538", border="#6721a7")
+
+dens_OPPFTF <- density(four_factors_new$OPPFTF)
+plot(dens_OPPFTF, main = "Opponent Free Throw Factor Density")
+polygon(dens_OPPFTF, col="#fca538", border="#6721a7")
+
+dens_WINS <- density(four_factors_new$WINS)
+plot(dens_WINS, main = "Wins Density")
+polygon(dens_WINS, col="#fca538", border="#6721a7")
+
+```
+
+\  
+
+### 2.4 Histogram of wins
+
+```{r}
+
+fig2 = ggplot(four_factors_scaled, aes(x=WINS, fill=Team)) + geom_histogram(binwidth=5) + labs(x="Wins")
+
+```
+
+![](wins_histogram_historical_binned.png)
+
+\  
+
+### 2.5 Pairplot for all variables
+
+\  
+
+##### Checking graphically pairwise relationships in our variables
+
+```{r}
+
+ggpairs(four_factors_scaled[c("WINS", "eFG", "TOV", "OREB", "FTF", "OPPeFG", "OPPTOV", "DREB", "OPPFTF")])
+
+```
+
+\  
+
+### 2.6 Correlation plot for all variables
+
+\  
+
+##### Checking graphically for multicolinearity between our different feature variables 
+
+```{r}
+
+? corrplot
+  
+C <- cor(four_factors_scaled[c("WINS", "eFG", "TOV", "OREB", "FTF", "OPPeFG", "OPPTOV", "DREB", "OPPFTF")])
+
+corrplot(C, method = "number", col = plasma(256), tl.col = "black")
+
+```
+
+\  
+
+There doesn't seem to be any moderate or strong multicolinarity to be aware of in the matrix
+
+\  
+
+***
+
+# 3. Modeling and Analysis
+
+\  
+
+### 3.1 Splitting our dataset into train and test subsets
+
+```{r}
+
+set.seed(8)
+rows <- sample(1:nrow(four_factors_scaled), 0.7*nrow(four_factors_scaled))
+ff_train = four_factors_scaled[rows,]
+ff_test = four_factors_scaled[-rows,]
+dim(ff_train)
+dim(ff_test)
+
+```
+
+\  
+
+### 3.2 Creating a Multiple Linear Regression model regressing the Four Factors on `WINS` using the test dataset
+
+```{r}
+
+lmWINS <- lm(WINS ~ eFG + TOV + OREB + FTF + OPPeFG + OPPTOV + DREB + OPPFTF, data = ff_train)
+
+summary(lmWINS)
+
+```
+
+\  
+
+### 3.2.1 Interpretation of F-statistic, P-value and R-squared value for the __lmWINS__ model
+
+From the F-statistic and p-value of our __lmWINS__ model, we can reject the null hypothesis that our predictor variables have no effect on `WINS`. There is strong evidence to conclude there is a relationship between our predictor and response variables.
+
+Our model explains approximately 94.4% of the variation in `WINS` using `eFG`, `TOV`, `OREB`, `FTF`, `OPPeFG`, `OPPTOV`, `DREB` and `OPPFTF` as predictors.
+
+\  
+
+### 3.2.2 Interpretation of coefficients for the __lmWINS__ model
+
+* An increase of 1 percentage point of `eFG` is associated with an average increase of 3.81 `WINS`, holding all else equal
+
+* An increase of 1 percentage point of `TOV` is associated with an average decrease of 3.64 `WINS`, holding all else equal
+
+* An increase of 1 percentage point of `OREB` is associated with an average increase of 1.11 `WINS`, holding all else equal
+
+* An increase of 1 percentage point of `FTF` is associated with an average increase of 0.69 `WINS`, holding all else equal
+
+* An increase of 1 percentage point of `OPPeFG` is associated with an average decrease of 3.86 `WINS`, holding all else equal
+
+* An increase of 1 percentage point of `OPPTOV` is associated with an average increase of 2.99 `WINS`, holding all else equal
+
+* An increase of 1 percentage point of `DREB` is associated with an average increase of 0.88 `WINS`, holding all else equal
+
+* An increase of 1 percentage point of `OPPFTF` is associated with an average decrease of 0.81 `WINS`, holding all else equal
+
+\  
+
+### 3.2.3  ANOVA table and confidence interval for the __lmWINS__ model
+
+```{r}
+
+anova(lmWINS)
+confint(lmWINS)
+
+```
+
+***
+
+From the ANOVA table, we can see that the F-statistic for each predictor variable is significant and adds prediction power to our model. All included variables are relevant to our model. 
+
+\  
+
+### 3.2.4  Checking to see if assumptions of linear regression are reasonably met for the __lmWINS__ model
+
+\ 
+
+#### 1. The relationship is linear
+
+```{r}
+
+plot(lmWINS, 1)
+
+```
+
+***
+
+Our residual plot is mostly flat. There are some points that skew the line, such as observation 116, 138 and 188, but overall the relationship is linear.
+
+\ 
+
+#### 2. Independence of error terms
+
+```{r}
+
+durbinWatsonTest(lmWINS)
+
+```
+
+***
+
+We fail to reject the null hypothesis that the error terms are not autocorrelated. We have met the independence assumption.
+
+\  
+
+#### 3. Variation of observations' error terms is constant
+
+```{r}
+
+plot(lmWINS, 3)
+
+```
+
+***
+
+The homoskedasticity assumption is met. In the scale-location plot we see points that spread in a normally pattern, there is no evidence of heteroskedasticity.
+
+\  
+
+#### 4. Values are normally distributed 
+
+```{r}
+
+plot(lmWINS, 2)
+
+```
+
+***
+
+From the Q-Q plot, we can see that points are very close to the diagonal line and are normally distributed.
+
+\  
+
+#### 5. Outliers and Influential Points
+
+```{r}
+
+plot(lmWINS, 4)
+plot(lmWINS, 5)
+
+```
+
+***
+
+We can look for outliers in our data using Cook's distance. Points 48, 138 and 188 are identified as outliers. These three points also appear in our residual vs. leverage graph as potential points of interest. 
+
+\  
+
+#### 6. Multicolinearity
+
+```{r}
+
+vif(lmWINS)
+
+```
+
+***
+
+All of our VIF values are below 4. There is no multicolinearity in our data. 
+
+\  
+
+### 3.3 Creating a Multiple Linear Regression model regressing the Four Factors on `MOV` using the train dataset
+
+```{r}
+
+lmMOV = lm(MOV ~ eFG + TOV + OREB + FTF + OPPeFG + OPPTOV + DREB + OPPFTF, data = ff_train)
+
+summary(lmMOV)
+
+```
+
+\  
+
+### 3.3.1 Interpretation of F-statistic, P-value and R-squared value 
+
+From the F-statistic and p-value of our __lmMOV__ model, we can reject the null hypothesis that our predictor variables have no effect on `MOV`. There is strong evidence to conclude there is a relationship between our predictor and response variables.
+
+Our model explains approximately 97.9% of the variation in `WINS` using `eFG`, `TOV`, `OREB`, `FTF`, `OPPeFG`, `OPPTOV`, `DREB` and `OPPFTF` as predictors.
+
+\  
+
+### 3.3.2 Interpretation of coefficients 
+
+* An increase of 1 percentage point of `eFG` is associated with an average increase of 1.42 `MOV`, holding all else equal
+
+* An increase of 1 percentage point of `TOV` is associated with an average decrease of 1.35 `MOV`, holding all else equal
+
+* An increase of 1 percentage point of `OREB` is associated with an average increase of 0.44 `MOV`, holding all else equal
+
+* An increase of 1 percentage point of `FTF` is associated with an average increase of 0.28 `MOV`, holding all else equal
+
+* An increase of 1 percentage point of `OPPeFG` is associated with an average decrease of 1.42 `MOV`, holding all else equal
+
+* An increase of 1 percentage point of `OPPTOV` is associated with an average increase of 1.19 `MOV`, holding all else equal
+
+* An increase of 1 percentage point of `DREB` is associated with an average increase of 0.42 `MOV`, holding all else equal
+
+* An increase of 1 percentage point of `OPPFTF` is associated with an average decrease of 0.28 `MOV`, holding all else equal
+
+\  
+
+### 3.3.3  ANOVA table and confidence interval
+
+```{r}
+
+anova(lmMOV)
+confint(lmMOV)
+
+```
+***
+
+From the ANOVA table, we can see that the F-statistic for each predictor variable is significant and adds prediction power to our model. All included variables are relevant to our model.
+
+\  
+
+### 3.3.4  Checking to see if assumptions of linear regression for the __lmMOV__ model are reasonably met 
+
+\ 
+
+#### 1. The relationship is linear
+
+```{r}
+
+plot(lmMOV, 1)
+
+```
+***
+
+Our residual plot is mostly flat. There are some points that skew the line, such as observation 116, 138 and 188, but overall the relationship is linear.
+
+\ 
+
+#### 2. Independence of error terms
+
+```{r}
+
+durbinWatsonTest(lmMOV)
+
+```
+***
+
+We fail to reject the null hypothesis that the error terms are not autocorrelated. We have met the independence assumption.
+
+\ 
+
+#### 3. Variation of observations' error terms is constant
+
+```{r}
+
+plot(lmMOV, 3)
+
+```
+***
+
+The homoskedasticity assumption is met. In the scale-location plot we see see points that are normally spread, there is no evidence of heteroskedasticity.
+
+\ 
+
+#### 4. Values are normally distributed 
+
+```{r}
+
+plot(lmMOV, 2)
+
+```
+***
+
+From the Q-Q plot, we can see that points are very close to the diagonal line.
+
+\ 
+
+#### 5. Outliers and Influential Points
+
+```{r}
+
+plot(lmMOV, 4)
+plot(lmMOV, 5)
+
+```
+***
+
+We can look for outliers in our data using Cook's distance. Points 48, 138 and 188 are identified as outliers. These three points also appear in our residual vs leverage graph as potential points of interest. 
+
+\ 
+
+#### 6. Multicolinearity
+
+```{r}
+
+vif(lmMOV)
+
+```
+***
+
+All of our VIF values are below 4. There is no multicolinearity in our data. 
+
+\  
+
+### 3.3.5 Linear Regression Models Summary
+
+From the ANOVA tables in 3.2.3 and 3.3.3, we can see that all four factors that Dean proposed are significant at threshold of p-value <0.01 for predicted both `WINS` and `MOV`
+
+\  
+
+### 3.4 Random Forest Model for `WINS`
+
+```{r}
+
+set.seed(10)
+rfWINS <- randomForest(formula = WINS ~ eFG + TOV + OREB + 
+  FTF + OPPeFG + OPPTOV + DREB + 
+  OPPFTF, type = prob, mtry = 8, ntree = 100,  data = ff_train)
+
+rfWINS
+
+importance_rfWINS <- importance(rfWINS)
+
+varImportance_rfWINS <- data.frame(Variables = row.names(importance_rfWINS), 
+                            Importance = round(importance_rfWINS[,'IncNodePurity'], 0))
+
+ggplotly(ggplot(varImportance_rfWINS, aes(x = reorder(Variables, Importance), 
+                           y = Importance, fill = Importance)) +
+       geom_bar(stat='identity') + 
+       labs(title = 'Importance of predictors', x = 'Predictors', y = 'rmsle') +
+       coord_flip() + 
+       theme_light())
+
+predicted_rfWINS = predict(rfWINS, ff_test)
+predicted_rfWINS
+plot(rfWINS)
+
+```
+
+\  
+
+### 3.5 Random Forest Model for `MOV`
+
+```{r}
+
+set.seed(12)
+rfMOV <- randomForest(
+  formula = MOV ~ eFG + TOV + OREB + 
+  FTF + OPPeFG + OPPTOV + DREB + 
+  OPPFTF, type = prob, mtry = 5, ntree = 100,  data = ff_train)
+
+rfMOV
+
+importance_rfMOV <- importance(rfMOV)
+
+varImportance_rfMOV <- data.frame(Variables = row.names(importance_rfMOV), 
+                            Importance = round(importance_rfMOV[,'IncNodePurity'], 0))
+
+ggplotly(ggplot(varImportance_rfMOV, aes(x = reorder(Variables, Importance), 
+                           y = Importance, fill = Importance)) +
+       geom_bar(stat='identity') + 
+       labs(title = 'Importance of predictors', x = 'Predictors', y = 'rmsle') +
+       coord_flip() + 
+       theme_light())
+
+predicted_rfMOV = predict(rfMOV, ff_test)
+predicted_rfMOV
+
+plot(rfMOV)
+
+```
+
+\  
+
+### 3.6  Gradient Boosting Machine Model for `WINS`
+
+```{r}
+
+
+set.seed (14)
+gbWINS = gbm(formula = WINS ~ eFG + TOV + OREB + 
+  FTF + OPPeFG + OPPTOV + DREB + 
+  OPPFTF, data = ff_train, distribution =
+"gaussian", n.trees =  5000, interaction.depth = 5)
+
+summary(gbWINS)
+
+predicted_gbWINS = predict(gbWINS, ff_test, n.trees = 5000)
+predicted_gbWINS 
+
+```
+
+\ 
+
+### 3.7  Gradient Boosting Machine Model for `MOV`
+
+```{r}
+
+set.seed (16)
+gbMOV = gbm(formula = MOV ~ eFG + TOV + OREB + 
+  FTF + OPPeFG + OPPTOV + DREB + 
+  OPPFTF, data = ff_train, distribution =
+"gaussian", n.trees =  5000, interaction.depth = 5)
+
+summary(gbMOV)
+
+predicted_gbMOV = predict(gbMOV, ff_test, n.trees = 5000)
+predicted_gbMOV 
+
+```
+
+\  
+
+### 3.8 Comparison of models
+
+Both `WINS` and `MOV` were predicted using three different models:
+
+1. Multiple Linear Regression
+2. Random Forest
+3. Gradient Boosting Machine
+
+For the final model, I decided to use multiple linear regression. The __lmWINS__ and __lmMOV__ models peformed better than the __rfWINS__, __rfMOV__, __gbWINS__, and __gbMOV__ models. Random forest and gradient boosting may have performed better, had I tweaked and tested different hyperparameter configurations. 
+
+Another reason I picked multiple linear regression as the final model type, is that it is a simpler model, which makes it easier to explain. In this case, the other models are black-box models, which can potentially provide more accuracy, but at the expense of explainability compared to a model like multiple linear regression. 
+
+Our __lmWINS__ and __lmMOV__ models can be stated mathematically as:
+
+\  
+
+\begin{equation}
+\begin{aligned}
+WINS ={} & - 53.185 + 3.899 * eFG\% - 3.392 * TOV\% + 1.111 * OREB\% \\
+        & + 0.708 * FTF - 3.765 * OPPeFG\% + 2.902 * OPPTOV\%\\
+        &  + 0.887 * DREB\% - 0.729 * OPPFTF + \epsilon\
+        
+\end{aligned}
+\end{equation} 
+
+\  
+
+\begin{equation}
+\begin{aligned}
+MOV ={} & - 38.851 + 1.436 * eFG\% - 1.323 * TOV\% + 0.438 * OREB\% \\
+        & + 0.296 * FTF - 1.420 * OPPeFG\% + 1.170 * OPPTOV\%\\
+        &  + 0.386 * DREB\% - 0.288 * OPPFTF + \epsilon\
+\end{aligned}
+\end{equation} 
+
+\  
+
+In the next section, we will evaluate our multiple linear regression model
+
+\  
+
+***
+
+# 4. Comparison of actual values with predicted values and metrics
+
+\  
+
+### 4.1 Creating a dataframe comparing predicted `WINS` and predicted `MOV` using our __lmWINS__ and __lmMOV__ models fit the test data, with the observed values of `WINS` and observed values of `MOV` 
+
+```{r}
+
+predicted_wins = predict(lmWINS, ff_test)
+pm = (predict(lmMOV, ff_test))
+
+actual_vs_predicted <- data.frame(predicted_wins)
+actual_vs_predicted$actual_wins <- ff_test[["WINS"]]
+actual_vs_predicted$predicted_mov <- pm
+actual_vs_predicted$actual_mov <- ff_test[["MOV"]]
+
+colnames(actual_vs_predicted) <- c("Predicted Wins", "Actual Wins", "Predicted Margin of Victory", "Acutal Margin of Victory")
+
+actual_vs_predicted <- actual_vs_predicted[, c(2, 1, 4, 3)]
+actual_vs_predicted
+
+
+
+```
+
+\  
+
+### 4.2 $R^2$ 
+
+```{r}
+
+R2(predicted_wins, ff_test$WINS)
+R2(pm, ff_test$MOV)
+```
+
+$R^2$ is the coefficient of determination. It is a measure of the goodness of fit of a model. Both the __lmWINS__ and __lmMOV__ models perform almost as well on the test data as they did on the training data they were originally fit on. This is a good indicator that our model generalize well, as it predicted well on data it was not trained on.
+
+\  
+
+##### $R^2$ values in training and test data sets 
+Model | Training | Test
+------------- | ------------- | ------------- 
+lmWINS | 0.9437 | 0.9300
+lmMOV | 0.9785 | 0.9783
+
+\  
+
+### 4.3 Mean Absolute Error
+
+```{r}
+
+MAE(predicted_wins, ff_test$WINS)
+MAE(pm, ff_test$MOV)
+
+```
+
+The MAE values for the __lmWINS__ model fit on the test data is 3.392 and for the __lmMOV__ model fit on the test data is 0.673. MAE represents the average absolute difference between actual and predicted outcomes. 
+
+\  
+
+### 4.4 Root Mean Squared Error
+
+```{r}
+
+RMSE(predicted_wins, ff_test$WINS)
+RMSE(pm, ff_test$MOV)
+
+```
+
+The RMSE values for the __lmWINS__ model fit on the test data is 3.392 and for the __lmMOV__ model fit on the test data is 0.673. RMSE represents the root of the average squared difference between actual and predicted outcomes.
+
+\  
+
+***
+
+# 5. Weights of the four factors 
+
+\  
+
+We can calculate the weights of the four factors in our __lmWINS__ and __lmMOV__ models by calculating the average of each of the coefficents for the four factors.
+
+\ 
+
+### 5.1 Weights for the __lmWINS__ model
+
+```{r}
+
+sum_all_lmWINS = (3.81049 + 3.63928 + 1.11257 + 0.68903 + 3.86393 + 2.98585 + 0.87871 + 0.81222)
+sum_all_lmWINS
+
+sum_eFG_lmWINS = (3.81049 + 3.86393)
+weight_eFG_lmWINS = 100 * (sum_eFG_lmWINS / sum_all_lmWINS)
+weight_eFG_lmWINS
+
+sum_TOV_lmWINS =(3.63928 + 2.98585)
+weight_TOV_lmWINS = 100 * (sum_TOV_lmWINS / sum_all_lmWINS)
+weight_TOV_lmWINS
+
+sum_REB_lmWINS = (1.11257 + 0.87871)
+weight_REB_lmWINS = 100 * (sum_REB_lmWINS / sum_all_lmWINS)
+weight_REB_lmWINS
+
+sum_FTF_lmWINS = (0.68903 + 0.81222)
+weight_FTF_lmWINS = 100 * (sum_FTF_lmWINS / sum_all_lmWINS)
+weight_FTF_lmWINS
+
+```
+
+\  
+
+Weights for the __lmWINS__ model:
+43.13% shooting, 37.24% turnovers, 11.19% rebounding, 8.44% foul rate
+
+\  
+
+### 5.2 Weights for the __lmMOV__ model
+
+```{r}
+
+sum_all_lmMOV = (1.42327 + 1.35036 + 0.44414 + 0.28314 + 1.42177 + 1.19145 + 0.41600 + 0.27912)
+sum_all_lmMOV
+
+sum_eFG_lmMOV = (1.42327 + 1.42177)
+weight_eFG_lmMOV = 100 * (sum_eFG_lmMOV / sum_all_lmMOV)
+weight_eFG_lmMOV
+
+sum_TOV_lmMOV =(1.35036 + 1.19145)
+weight_TOV_lmMOV = 100 * (sum_TOV_lmMOV / sum_all_lmMOV)
+weight_TOV_lmMOV
+
+sum_REB_lmMOV = (0.44414 + 0.41600)
+weight_REB_lmMOV = 100 * (sum_REB_lmMOV / sum_all_lmMOV)
+weight_REB_lmMOV
+
+sum_FTF_lmMOV = (0.28314 + 0.27912)
+weight_FTF_lmMOV = 100 * (sum_FTF_lmMOV / sum_all_lmMOV)
+weight_FTF_lmMOV
+
+```
+
+\ 
+
+Weights for the __lmMOV__ model:
+41.78% shooting, 37.33% turnovers, 12.63% rebounding, 8.26% foul rate 
+
+\  
+
+### 5.3 Comparing Model Weights to Oliver's
+
+__Factor__ | __Oliver__ | __lmWINS__ | __lmMOV__
+------------- | ------------- | ------------- | -------------
+Shooting | 40.00% | 43.13%| 41.78%
+Turnovers | 25.00% | 37.24% | 37.33%
+Rebounding | 20.00% | 11.19% | 12.63%
+Foul Rate | 15.00% | 8.44% | 8.26%
+
+\ 
+
+The values we achieved are reasonably close to those Oliver proposed. Shooting is the most important factor for winning games in the NBA. Turnovers are very close in importance as the second most important factor. This makes sense intuitively from a very high level as if you don't have possession of the ball, you can't score the ball and therefore win a game. In the __lmWINS__ and __lmMOV__ models, we also place rebounding and foul rate as the 3rd and 4th most important factors respectively. However, the weights that we assign those factors in our model is about ~ 55% - 63% of the weight that Oliver assigned. 
+
+\  
+
+***
+
+# 6. Four Factors historical changes  
+
+\ 
+
+### 6.1 Preparing data sets for visualizations
+
+```{r}
+
+four_factors_historical <- four_factors_scaled
+
+four_factors_hist <- read_excel("per_100_possessions.xlsx")
+four_factors_hist_new <- four_factors_hist %>% dplyr::rename(eFG = `eFG%`,
+                                TO = `TOV%`,
+                                OREB = `ORB%`,
+                                FTF = `FT/FGA`)
+
+```
+
+\ 
+
+### 6.2 Scatter plots of the four factors for all NBA teams from the 2008 to 2018 seasons
+
+\  
+
+### 6.2.1 `eFG`
+
+```{r}
+
+eFG_all_hist <- ggplot(data = four_factors_historical, aes(x = Season, y = eFG))
+
+eFG_all_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season)))
+
+```
+
+\  
+
+### 6.2.2 `TOV`
+
+```{r}
+
+TOV_all_hist <- ggplot(data = four_factors_historical, aes(x = Season, y = TOV))
+
+TOV_all_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season)))
+
+```
+
+\  
+
+### 6.2.3 `OREB`
+
+```{r}
+
+OREB_all_hist <- ggplot(data = four_factors_historical, aes(x = Season, y = OREB))
+
+OREB_all_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season)))
+
+```
+
+\  
+
+### 6.2.4 `FTF`
+
+```{r}
+
+FTF_all_hist <- ggplot(data = four_factors_historical, aes(x = Season, y = FTF))
+
+FTF_all_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season)))
+
+```
+
+\  
+
+### 6.3 Scatter plots of league averages of the four factors from the 2001 to 2019 seasons
+
+\
+
+### 6.3.1 `eFG` 
+```{r}
+
+eFG_ave_hist <- ggplot(data = four_factors_hist_new, aes(x = Season, y = eFG))
+
+eFG_ave_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season))) 
+
+```
+
+\  
+
+### 6.3.2 `TOV`
+```{r}
+
+TOV_ave_hist <- ggplot(data = four_factors_hist_new, aes(x = Season, y = TO))
+
+TOV_ave_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season)))
+
+```
+
+\  
+
+### 6.3.3 `OREB`
+```{r}
+
+OREB_ave_hist <- ggplot(data = four_factors_hist_new, aes(x = Season, y = OREB))
+
+OREB_ave_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season)))
+
+```
+
+\  
+
+### 6.3.4 `FTF`
+```{r}
+
+FTF_ave_hist <- ggplot(data = four_factors_hist_new, aes(x = Season, y = FTF))
+
+FTF_ave_hist + geom_point(alpha=1/2, size=4,
+ aes(color=factor(Season)))
+
+```
+
+
+
+
