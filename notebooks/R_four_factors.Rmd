@@ -26,6 +26,7 @@ library(car)
 library(caret)
 library(corrplot)
 library(dplyr)
+library(formattable)
 library(gbm)
 library(GGally)
 library(ggplot2)
@@ -614,7 +615,7 @@ plot(lmMOV, 1)
 ```
 ***
 
-Our residual plot is mostly flat. There are some points that skew the line, such as observation 116, 138 and 188, but overall the relationship is linear.
+Our residual plot is mostly flat. There are some points that skew the line, such as observation 63, 189 and 198, but overall the relationship is linear.
 
 \ 
 
@@ -680,7 +681,7 @@ vif(lmMOV)
 ```
 ***
 
-All of our VIF values are below 4. There is no multicolinearity in our data. 
+All of our VIF values are below 4. There is no multicollinearity in our data. 
 
 \  
 
@@ -847,28 +848,55 @@ In the next section, we will evaluate our multiple linear regression model
 predicted_wins = predict(lmWINS, ff_test)
 pm = (predict(lmMOV, ff_test))
 
-actual_vs_predicted <- data.frame(predicted_wins)
-actual_vs_predicted$actual_wins <- ff_test[["WINS"]]
-actual_vs_predicted$predicted_mov <- pm
-actual_vs_predicted$actual_mov <- ff_test[["MOV"]]
+observed_vs_predicted <- data.frame(predicted_wins)
+observed_vs_predicted$observed_wins <- ff_test[["WINS"]]
+observed_vs_predicted$predicted_mov <- pm
+observed_vs_predicted$observed_mov <- ff_test[["MOV"]]
 
-colnames(actual_vs_predicted) <- c("Predicted Wins", "Actual Wins", "Predicted Margin of Victory", "Acutal Margin of Victory")
+colnames(observed_vs_predicted) <- c("Predicted Wins", "Observed Wins", "Predicted Margin of Victory", "Observed Margin of Victory")
 
-actual_vs_predicted <- actual_vs_predicted[, c(2, 1, 4, 3)]
-actual_vs_predicted
-
-
+observed_vs_predicted <- observed_vs_predicted[, c(2, 1, 4, 3)]
+observed_vs_predicted
 
 ```
 
 \  
 
-### 4.2 $R^2$ 
+```{r}
+
+plot(observed_vs_predicted$"Observed Wins", observed_vs_predicted$"Predicted Wins",
+     main="Observed vs. Predicted Wins",
+     xlab="Predicted Wins",
+     ylab="Observed Wins",
+     col="blue")
+
+```
+
+\  
+
+### 4.2 Creating a new dataframe with the team identifier, and their respective observed and predicted WINS and MOV
+
+```{r}
+
+id_observed_vs_predicted <- observed_vs_predicted
+id_observed_vs_predicted$Team <- ff_test$Team
+id_observed_vs_predicted$Season <- ff_test$Season
+id_observed_vs_predicted <- id_observed_vs_predicted[, c(5, 6, 1, 2, 3, 4)]
+id_observed_vs_predicted
+
+formattable(id_observed_vs_predicted[1:50,])
+
+```
+
+\  
+
+### 4.3 $R^2$ 
 
 ```{r}
 
 R2(predicted_wins, ff_test$WINS)
 R2(pm, ff_test$MOV)
+
 ```
 
 $R^2$ is the coefficient of determination. It is a measure of the goodness of fit of a model. Both the __lmWINS__ and __lmMOV__ models perform almost as well on the test data as they did on the training data they were originally fit on. This is a good indicator that our model generalize well, as it predicted well on data it was not trained on.
@@ -878,12 +906,12 @@ $R^2$ is the coefficient of determination. It is a measure of the goodness of fi
 ##### $R^2$ values in training and test data sets 
 Model | Training | Test
 ------------- | ------------- | ------------- 
-lmWINS | 0.9437 | 0.9300
-lmMOV | 0.9785 | 0.9783
+lmWINS | 0.9435 | 0.9300
+lmMOV | 0.9785 | 0.9707
 
 \  
 
-### 4.3 Mean Absolute Error
+### 4.4 Mean Absolute Error
 
 ```{r}
 
@@ -896,7 +924,7 @@ The MAE values for the __lmWINS__ model fit on the test data is 3.392 and for th
 
 \  
 
-### 4.4 Root Mean Squared Error
+### 4.5 Root Mean Squared Error
 
 ```{r}
 
@@ -923,22 +951,22 @@ We can calculate the weights of the four factors in our __lmWINS__ and __lmMOV__
 
 ```{r}
 
-sum_all_lmWINS = (3.81049 + 3.63928 + 1.11257 + 0.68903 + 3.86393 + 2.98585 + 0.87871 + 0.81222)
+sum_all_lmWINS = (3.89934 + 3.39168 + 1.11070 + 0.70791 + 3.76483 + 2.90168 + 0.88666 + 0.72897)
 sum_all_lmWINS
 
-sum_eFG_lmWINS = (3.81049 + 3.86393)
+sum_eFG_lmWINS = (3.89934 + 3.76483)
 weight_eFG_lmWINS = 100 * (sum_eFG_lmWINS / sum_all_lmWINS)
 weight_eFG_lmWINS
 
-sum_TOV_lmWINS =(3.63928 + 2.98585)
+sum_TOV_lmWINS =(3.39168 + 2.90168)
 weight_TOV_lmWINS = 100 * (sum_TOV_lmWINS / sum_all_lmWINS)
 weight_TOV_lmWINS
 
-sum_REB_lmWINS = (1.11257 + 0.87871)
+sum_REB_lmWINS = (1.11070 + 0.88666)
 weight_REB_lmWINS = 100 * (sum_REB_lmWINS / sum_all_lmWINS)
 weight_REB_lmWINS
 
-sum_FTF_lmWINS = (0.68903 + 0.81222)
+sum_FTF_lmWINS = (0.70791 + 0.72897)
 weight_FTF_lmWINS = 100 * (sum_FTF_lmWINS / sum_all_lmWINS)
 weight_FTF_lmWINS
 
@@ -947,7 +975,7 @@ weight_FTF_lmWINS
 \  
 
 Weights for the __lmWINS__ model:
-43.13% shooting, 37.24% turnovers, 11.19% rebounding, 8.44% foul rate
+44.07% shooting, 36.19% turnovers, 11.48% rebounding, 8.26% foul rate
 
 \  
 
@@ -955,22 +983,22 @@ Weights for the __lmWINS__ model:
 
 ```{r}
 
-sum_all_lmMOV = (1.42327 + 1.35036 + 0.44414 + 0.28314 + 1.42177 + 1.19145 + 0.41600 + 0.27912)
+sum_all_lmMOV = (1.43555 + 1.32334 + 0.43792 + 0.29640 + 1.42002 + 1.17049 + 0.38560 + 0.28811)
 sum_all_lmMOV
 
-sum_eFG_lmMOV = (1.42327 + 1.42177)
+sum_eFG_lmMOV = (1.43555 + 1.42002)
 weight_eFG_lmMOV = 100 * (sum_eFG_lmMOV / sum_all_lmMOV)
 weight_eFG_lmMOV
 
-sum_TOV_lmMOV =(1.35036 + 1.19145)
+sum_TOV_lmMOV =(1.32334 + 1.17049)
 weight_TOV_lmMOV = 100 * (sum_TOV_lmMOV / sum_all_lmMOV)
 weight_TOV_lmMOV
 
-sum_REB_lmMOV = (0.44414 + 0.41600)
+sum_REB_lmMOV = (0.43792 + 0.38560)
 weight_REB_lmMOV = 100 * (sum_REB_lmMOV / sum_all_lmMOV)
 weight_REB_lmMOV
 
-sum_FTF_lmMOV = (0.28314 + 0.27912)
+sum_FTF_lmMOV = (0.29640 + 0.28811)
 weight_FTF_lmMOV = 100 * (sum_FTF_lmMOV / sum_all_lmMOV)
 weight_FTF_lmMOV
 
@@ -979,22 +1007,22 @@ weight_FTF_lmMOV
 \ 
 
 Weights for the __lmMOV__ model:
-41.78% shooting, 37.33% turnovers, 12.63% rebounding, 8.26% foul rate 
+42.26% shooting, 36.91% turnovers, 12.19% rebounding, 8.65% foul rate 
 
 \  
 
 ### 5.3 Comparing Model Weights to Oliver's
 
-__Factor__ | __Oliver__ | __lmWINS__ | __lmMOV__
+__Factor__ | __Oliver__ | __Küpfer__ | __lmWINS__ | __lmMOV__
 ------------- | ------------- | ------------- | -------------
-Shooting | 40.00% | 43.13%| 41.78%
-Turnovers | 25.00% | 37.24% | 37.33%
-Rebounding | 20.00% | 11.19% | 12.63%
-Foul Rate | 15.00% | 8.44% | 8.26%
+Shooting | 40.00% | 45.45% | 44.07% | 42.26%
+Turnovers | 25.00% | 27.27% | 36.19% | 36.91%
+Rebounding | 20.00% | 13.64% | 11.48% | 12.19%
+Free Throw Factor | 15.00% | 13.64% | 8.26% | 8.65%
 
 \ 
 
-The values we achieved are reasonably close to those Oliver proposed. Shooting is the most important factor for winning games in the NBA. Turnovers are very close in importance as the second most important factor. This makes sense intuitively from a very high level as if you don't have possession of the ball, you can't score the ball and therefore win a game. In the __lmWINS__ and __lmMOV__ models, we also place rebounding and foul rate as the 3rd and 4th most important factors respectively. However, the weights that we assign those factors in our model is about ~ 55% - 63% of the weight that Oliver assigned. 
+The values we achieved are reasonably close to those Oliver proposed. Shooting is the most important factor for winning games in the NBA. Turnovers are very close in importance as the second most important factor. This makes sense intuitively from a very high level as if you don't have possession of the ball, you can't score the ball and therefore win a game. In the __lmWINS__ and __lmMOV__ models, we also place rebounding and foul rate as the 3rd and 4th most important factors respectively. However, the weights that we assign those factors in our model is ~ 55% - 63% of the weight that Oliver assigned. 
 
 \  
 
@@ -1125,7 +1153,4 @@ FTF_ave_hist + geom_point(alpha=1/2, size=4,
  aes(color=factor(Season)))
 
 ```
-
-
-
 
