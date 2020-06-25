@@ -1,10 +1,15 @@
 # four_factors
 
-_"All models are wrong, but some are useful."_ George E.P. Box
+_"All models are wrong, but some are useful."_ - George E.P. Box
 
 ## Introduction
 
-The purpose of this paper is twofold. The first is to introduce and visualize historical changes of [Dean Oliver's](http://www.basketballonpaper.com/)[ "Four Factors of Basketball Success in the NBA"](https://www.basketball-reference.com/about/factors.html). The second is to use these four factors to create models to predict wins and margin of victory for different NBA teams.
+This research intends to:
+
+
+1) Introduce [Dean Oliver's](http://www.basketballonpaper.com/)[ "Four Factors of Basketball Success in the NBA"](https://www.basketball-reference.com/about/factors.html) and test if the four factors are statistically significant predictors of success in the NBA
+2) Use the four factors to predict a team's number of wins and average margin of victory in the NBA using historical data and various machine learning models 
+3) Compare the observed weightings of the different factors in our models to those proposed by Dean Oliver and Ed Küpfer.
 
 ## What's In This Repository?
 
@@ -15,9 +20,11 @@ The purpose of this paper is twofold. The first is to introduce and visualize hi
       * images
       
 #### Notebooks
-  * modeling.ipynb <br>
-  * historical_changes_visualizations.ipynb <br>
+  * Modeling Oliver’s Four Factors.pdf <br>
+  * R_four_factors.Rmd <br>
   * basketball_reference_scraping.ipynb <br>
+  * historical_changes_visualizations.ipynb <br>
+  * modeling.ipynb <br>
 
 #### Datasets 
   * per_100_posessions_historical.xlsx
@@ -25,18 +32,7 @@ The purpose of this paper is twofold. The first is to introduce and visualize hi
   * four_factors_all_seasons.xlsx
 
 #### Figures
-  * Historical changes
-      * eFG.png <br>
-      * TOV.png <br>
-      * OREB.png <br>
-      * FTF.png <br>
-  * Modeling
-      * heatmap.png <br>
-      * pairplot.png <br>
-      * OLSresults.png <br>
-      * wins_comparison.png <br>
-      * wins_comparison_2.png <br>
-      * wins_scatter.png <br>
+
 
 ## Python Libraries Used
 
