@@ -33,6 +33,40 @@ This research intends to:
 
 #### Figures
 
+## Models Used
+
+[Multiple Linear Regression](https://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf#page=83)<br>
+[Random Forest](https://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf#page=328)<br>
+[Gradient Boosting](https://web.stanford.edu/~hastie/Papers/ESLII.pdf#page=378)<br>
+[Neural Network](https://web.stanford.edu/~hastie/Papers/ESLII.pdf#page=411) (future work)
+
+## R Libraries Used
+
+#### Analysis
+[sjstats](https://cran.r-project.org/web/packages/sjstata/index.html)<br>
+
+#### Data Processing
+[dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)<br>
+[readxl](https://cran.r-project.org/web/packages/readxl/index.html)<br>
+[tidyr](https://cran.r-project.org/web/packages/tidyr/index.html)<br>
+
+#### Data Visualization
+[corrplot](https://cran.r-project.org/web/packages/corrplot/index.html)<br>
+[formattable](https://cran.r-project.org/web/packages/formattable/index.html)<br>
+[GGally](https://cran.r-project.org/web/packages/GGally/index.html)<br>
+[ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)<br>
+[kableExtra](https://cran.r-project.org/web/packages/kableExtra/index.html)<br>
+[knitr](https://cran.r-project.org/web/packages/knitr/index.html)<br>
+[plotly](https://cran.r-project.org/web/packages/plotly/index.html)<br>
+[scales](https://cran.r-project.org/web/packages/scales/index.html)<br>
+[stargazer](https://cran.r-project.org/web/packages/stargazer/index.html)<br>
+[viridis](https://cran.r-project.org/web/packages/viridis/index.html)<br>
+
+#### Machine Learning
+[car](https://cran.r-project.org/web/packages/car/index.html)<br>
+[caret](https://cran.r-project.org/web/packages/caret/index.html)<br>
+[gbm](https://cran.r-project.org/web/packages/gbm/index.html)<br>
+[randomforest](https://cran.r-project.org/web/packages/randomforest/index.html)<br>
 
 ## Python Libraries Used
 
@@ -47,37 +81,6 @@ This research intends to:
 #### Machine Learning
 [Scikit-Learn](https://scikit-learn.org/stable/)<br>
 [Statsmodels](https://www.statsmodels.org/dev/index.html)<br>
-
-## R Libraries Used
-
-#### Analysis
-[sjstats](https://cran.r-project.org/web/packages/sjstata/index.html)<br>
-
-#### Data Processing
-[dplyr](https://cran.r-project.org/web/packages/dplyr/index.html)<br>
-[readxl](https://cran.r-project.org/web/packages/readxl/index.html)<br>
-[tidyr](https://cran.r-project.org/web/packages/tidyr/index.html)<br>
-
-#### Data Visualization
-[corrplot](https://cran.r-project.org/web/packages/corrplot/index.html)<br>
-[GGally](https://cran.r-project.org/web/packages/GGally/index.html)<br>
-[ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)<br>
-[plotly](https://cran.r-project.org/web/packages/plotly/index.html)<br>
-[scales](https://cran.r-project.org/web/packages/scales/index.html)<br>
-[viridis](https://cran.r-project.org/web/packages/viridis/index.html)<br>
-
-#### Machine Learning
-[car](https://cran.r-project.org/web/packages/car/index.html)<br>
-[caret](https://cran.r-project.org/web/packages/caret/index.html)<br>
-[gbm](https://cran.r-project.org/web/packages/gbm/index.html)<br>
-[randomforest](https://cran.r-project.org/web/packages/randomforest/index.html)<br>
-
-## Models Used
-
-[Multiple Linear Regression](https://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf#page=83)<br>
-[Random Forest](https://faculty.marshall.usc.edu/gareth-james/ISL/ISLR%20Seventh%20Printing.pdf#page=328)<br>
-[Gradient Boosting](https://web.stanford.edu/~hastie/Papers/ESLII.pdf#page=378)<br>
-[Neural Network](https://web.stanford.edu/~hastie/Papers/ESLII.pdf#page=411) (future work)
 
 ## Additional Resources
 
