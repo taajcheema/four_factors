@@ -4,6 +4,7 @@ author: "Taaj Cheema"
 output:
   html_document:
     keep_md: yes
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -30,12 +31,15 @@ library(formattable)
 library(gbm)
 library(GGally)
 library(ggplot2)
+library(kableExtra)
+library(knitr)
 library(plotly)
 library(randomForest)
 library(readxl)
 library(rmarkdown)
 library(scales)
 library(sjstats)
+suppressMessages(library(stargazer))
 library(tidyr)
 library(viridis)
 
@@ -416,6 +420,20 @@ summary(lmWINS)
 
 \  
 
+```{r}
+
+stargazer(lmWINS,
+          type = "html",
+          style = "apsr",
+          title = "Regression results", 
+          header = FALSE,
+          single.row = TRUE, 
+          out = "lmWINS.html")
+
+```
+
+\
+
 ### 3.2.1 Interpretation of F-statistic, P-value and R-squared value for the __lmWINS__ model
 
 From the F-statistic and p-value of our __lmWINS__ model, we can reject the null hypothesis that our predictor variables have no effect on `WINS`. There is strong evidence to conclude there is a relationship between our predictor and response variables.
@@ -559,6 +577,33 @@ summary(lmMOV)
 ```
 
 \  
+
+```{r}
+
+stargazer(lmMOV,
+          type = "html",
+          style = "apsr",
+          title = "Regression results", 
+          header = FALSE,
+          single.row = TRUE, 
+          out = "tablelmMOV.html")
+
+```
+
+\
+
+```{r}
+
+stargazer(lmWINS,lmMOV,
+          type = "html",
+          style = "apsr",
+          title = "Regression results", 
+          header = FALSE,
+          single.row = TRUE, 
+          out = "linearModels.html")
+
+```
+
 
 ### 3.3.1 Interpretation of F-statistic, P-value and R-squared value 
 
@@ -890,6 +935,29 @@ formattable(id_observed_vs_predicted[1:50,])
 
 \  
 
+```{r}
+
+obs_vs_pred <- read_excel("o_vs_p.xlsx")
+obs_vs_pred_table <- kable(obs_vs_pred)
+obs_vs_pred_table
+
+```
+
+\
+
+```{r}
+
+o_v_p_3 <- obs_vs_pred %>%
+  kbl() %>%
+  kable_styling(font_size = 16)
+
+o_v_p_3
+
+```
+
+\  
+
+
 ### 4.3 $R^2$ 
 
 ```{r}
@@ -1021,6 +1089,43 @@ Rebounding | 20.00% | 13.64% | 11.48% | 12.19%
 Free Throw Factor | 15.00% | 13.64% | 8.26% | 8.65%
 
 \ 
+
+```{r}
+
+model_weights <- read_excel("model_weights.xlsx")
+mw <- kable(model_weights)
+mw
+
+```
+
+\
+
+```{r}
+
+mw2 <- kbl(model_weights)
+mw2
+
+```
+
+
+\
+
+
+
+```{r}
+
+mw3 <- model_weights %>%
+  kbl() %>%
+  kable_styling(font_size = 24)
+
+mw3
+
+```
+
+
+
+\
+
 
 The values we achieved are reasonably close to those Oliver proposed. Shooting is the most important factor for winning games in the NBA. Turnovers are very close in importance as the second most important factor. This makes sense intuitively from a very high level as if you don't have possession of the ball, you can't score the ball and therefore win a game. In the __lmWINS__ and __lmMOV__ models, we also place rebounding and foul rate as the 3rd and 4th most important factors respectively. However, the weights that we assign those factors in our model is ~ 55% - 63% of the weight that Oliver assigned. 
 
